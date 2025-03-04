@@ -1,5 +1,6 @@
 package com.example.ecomm.ecommercee.service;
 
+import com.example.ecomm.ecommercee.exceptions.ResourceNotFoundException;
 import com.example.ecomm.ecommercee.model.Category;
 import com.example.ecomm.ecommercee.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -14,69 +15,52 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CategoryServiceImpl implements CategoryService {
+public class CategoryServiceImpl implements CategoryService{
     //private List<Category> categories = new ArrayList<>();
-   private Long nextId = 1L;
+    //private Long nextId = 1L;
+
     @Autowired
     private CategoryRepository categoryRepository;
+
     @Override
     public List<Category> getAllCategories() {
-
         return categoryRepository.findAll();
     }
 
     @Override
-    @Transactional
     public void createCategory(Category category) {
-       category.setCategoryId(nextId++);
-        //categories.add(category);
+        //category.setCategoryId(nextId++);
         categoryRepository.save(category);
     }
 
     @Override
-    @Transactional
     public String deleteCategory(Long categoryId) {
-        List<Category> categories =categoryRepository.findAll();
-        Category category = categories.stream()// converting collections to strams , so we can apply filtering etc to it
+        List<Category> categories = categoryRepository.findAll();
+
+        Category category = categories.stream()
                 .filter(c -> c.getCategoryId().equals(categoryId))
                 .findFirst()
-
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND , "Resource Not Found"));
-
-
-        //.orElse(null);
-//        if (category == null)
-//            return "category not found";
-
-       // categories.remove(category);
+               // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+                .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
         categoryRepository.delete(category);
-        return "category with categoryId:" + categoryId +"deleted successfully";
+        return "Category with categoryId: " + categoryId + " deleted successfully !!";
     }
 
     @Override
-    @Transactional
     public Category updateCategory(Category category, Long categoryId) {
-        // way 1
-//        List<Category> categories =categoryRepository.findAll();
-//        Optional<Category> optionalCategory = categories.stream()// converting collections to strams , so we can apply filtering etc to it
-//                .filter(c -> c.getCategoryId().equals(categoryId))
-//                .findFirst();
-//        if(optionalCategory.isPresent()){
-//            Category existingCategory = optionalCategory.get();
-//            existingCategory.setCategoryName(category.getCategoryName());
-//            Category savedCategory = categoryRepository.save(existingCategory);
-//            return savedCategory;
-//        }
-//         else{
-//             throw new ResponseStatusException(HttpStatus.NOT_FOUND , "category Not Found");
-//        }
+        List<Category> categories = categoryRepository.findAll();
 
-        //way 2
-        Category existingCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+        Optional<Category> optionalCategory = categories.stream()
+                .filter(c -> c.getCategoryId().equals(categoryId))
+                .findFirst();
 
-        existingCategory.setCategoryName(category.getCategoryName());
-        return categoryRepository.save(existingCategory);
-
+        if(optionalCategory.isPresent()){
+            Category existingCategory = optionalCategory.get();
+            existingCategory.setCategoryName(category.getCategoryName());
+            Category savedCategory = categoryRepository.save(existingCategory);
+            return savedCategory;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
+        }
     }
 }
