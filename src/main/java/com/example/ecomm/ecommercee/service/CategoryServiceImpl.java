@@ -9,9 +9,15 @@ import com.example.ecomm.ecommercee.repositories.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -27,6 +33,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Autowired
     private ModelMapper modelMapper;
+
 
 
 
@@ -66,8 +73,11 @@ public class CategoryServiceImpl implements CategoryService{
 
 
     @Override
-    public CategoryResponse getAllCategories() {
-        List<Category> categories= categoryRepository.findAll();
+    public CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize) {
+        Pageable pageDetails = PageRequest.of(pageNumber,pageSize);
+        Page<Category> categoryPage= categoryRepository.findAll(pageDetails);
+        List<Category> categories= categoryPage.getContent();
+        //List<Category> categories= categoryRepository.findAll();
         if(categories.isEmpty())
             throw new APIException("No category created till now");
         List<CategoryDTO> categoryDTOS= categories.stream()
