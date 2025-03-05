@@ -1,6 +1,8 @@
 package com.example.ecomm.ecommercee.controller;
 
 import com.example.ecomm.ecommercee.model.Category;
+import com.example.ecomm.ecommercee.payload.CategoryDTO;
+import com.example.ecomm.ecommercee.payload.CategoryResponse;
 import com.example.ecomm.ecommercee.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +20,25 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/public/categories")
+//    @GetMapping("/public/categories")
+//    //@RequestMapping(value = "/public/categories", method = RequestMethod.GET)
+//    public ResponseEntity<List<Category>> getAllCategories() {
+//        List<Category> categories = categoryService.getAllCategories();
+//        return new ResponseEntity<>(categories, HttpStatus.OK);
+//    }
+
+        @GetMapping("/public/categories")
     //@RequestMapping(value = "/public/categories", method = RequestMethod.GET)
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+    public ResponseEntity<CategoryResponse> getAllCategories() {
+        CategoryResponse categoryResponse = categoryService.getAllCategories();
+        return new ResponseEntity<>(categoryResponse, HttpStatus.OK);
     }
 
     @PostMapping("/public/categories")
     //@RequestMapping(value = "/public/categories", method = RequestMethod.POST)
-    public ResponseEntity<String> createCategory(@Valid @RequestBody Category category) {
-        categoryService.createCategory(category);
-        return new ResponseEntity<>("Category added successfully", HttpStatus.CREATED);
+    public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
+       CategoryDTO savedCateoryDTO = categoryService.createCategory(categoryDTO);
+        return new ResponseEntity<>(savedCateoryDTO, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/admin/categories/{categoryId}")
