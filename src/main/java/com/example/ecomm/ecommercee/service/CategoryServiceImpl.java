@@ -62,20 +62,40 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public String deleteCategory(Long categoryId) {
-        List<Category> categories = categoryRepository.findAll();
-
-        Category category = categories.stream()
-                .filter(c -> c.getCategoryId().equals(categoryId))
-                .findFirst()
-               // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+    public CategoryDTO deleteCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
         categoryRepository.delete(category);
-        return "Category with categoryId: " + categoryId + " deleted successfully !!";
+        return modelMapper.map(category, CategoryDTO.class);
     }
 
+
+
+//    @Override
+//    public String deleteCategory(Long categoryId) {
+//        List<Category> categories = categoryRepository.findAll();
+//
+//        Category category = categories.stream()
+//                .filter(c -> c.getCategoryId().equals(categoryId))
+//                .findFirst()
+//               // .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found"));
+//                .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
+//        categoryRepository.delete(category);
+//        return "Category with categoryId: " + categoryId + " deleted successfully !!";
+//    }
+
     @Override
-    public Category updateCategory(Category category, Long categoryId) {
+    public CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId) {
+       Category savedCategory = categoryRepository.findById(categoryId)
+               .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
+       Category category=modelMapper.map(categoryDTO,Category.class);
+       category.setCategoryId(categoryId);
+       savedCategory=categoryRepository.save(category);
+        return modelMapper.map(savedCategory, CategoryDTO.class);
+    }
+//
+//    @Override
+//    public Category updateCategory(Category category, Long categoryId) {
 //        List<Category> categories = categoryRepository.findAll();
 //
 //        Optional<Category> optionalCategory = categories.stream()
@@ -90,12 +110,12 @@ public class CategoryServiceImpl implements CategoryService{
 //        } else {
 //            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
 //        }
-        Category savedCategory = categoryRepository.findById(categoryId)
-                .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
-        category.setCategoryId(categoryId);
-        savedCategory=categoryRepository.save(category);
-        return savedCategory;
-    }
+//        Category savedCategory = categoryRepository.findById(categoryId)
+//                .orElseThrow(()->new ResourceNotFoundException("category", "categoryId", categoryId));
+//        category.setCategoryId(categoryId);
+//        savedCategory=categoryRepository.save(category);
+//        return savedCategory;
+//    }
 
     @Override
     public CategoryResponse getAllCategories() {
